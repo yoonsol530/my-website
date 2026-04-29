@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deutsch Immersion Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-light: #f8fafd;
+            --accent-burgundy: #7f1d1d;
+            --accent-blue: #e0eefc;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --glass-white: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', 'Pretendard', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(224, 238, 252, 0.5) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 228, 230, 0.4) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 4rem 2rem;
+        }
+
+        header { text-align: center; margin-bottom: 4rem; animation: fadeIn 1s ease; }
+        #date-de {
+            color: var(--accent-burgundy); font-weight: 600;
+            text-transform: capitalize; font-size: 1.1rem; margin-bottom: 0.5rem;
+        }
+        header h1 { font-size: 3.2rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; }
+        #quote-container { max-width: 700px; color: var(--text-dim); line-height: 1.6; font-size: 1.1rem; }
+
+        .search-container { width: 100%; max-width: 600px; margin-bottom: 5rem; animation: fadeIn 1.2s ease; }
+        .search-bar {
+            background: white; border-radius: 20px;
+            padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 1rem;
+            box-shadow: var(--shadow-soft); border: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+        .search-bar:focus-within { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); border-color: #cbd5e1; }
+        .search-bar input { background: transparent; border: none; outline: none; color: var(--text-main); width: 100%; font-size: 1.1rem; }
+        
+        .engine-selector { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+        .engine-btn { 
+            background: white; border: 1px solid #e2e8f0; color: var(--text-dim);
+            padding: 0.4rem 1.2rem; border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: var(--transition);
+        }
+        .engine-btn.active { background: #f1f5f9; color: var(--accent-burgundy); border-color: var(--accent-burgundy); font-weight: 600; }
+
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; width: 100%; max-width: 1200px;
+        }
+
+        .category-card {
+            background: var(--glass-white); backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border); border-radius: 30px;
+            padding: 2.2rem; box-shadow: var(--shadow-soft); transition: var(--transition);
+        }
+        .category-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); border-color: white; }
+        
+        .card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem; font-size: 1.1rem; font-weight: 700; color: #334155; }
+        .card-header i { color: var(--accent-burgundy); }
+
+        .link-list { list-style: none; }
+        .link-item { margin-bottom: 0.8rem; text-align: center; }
+        .link-item a {
+            text-decoration: none; color: #475569; font-size: 1.05rem;
+            display: block; padding: 0.6rem; border-radius: 12px; transition: var(--transition);
+        }
+        .link-item a:hover { color: var(--accent-burgundy); background: rgba(255,255,255,0.5); }
+
+        #de-memo {
+            width: 100%; height: 160px; background: rgba(241, 245, 249, 0.5); border: 1px solid #e2e8f0;
+            border-radius: 15px; color: var(--text-main); padding: 1rem; resize: none; outline: none;
+            font-size: 0.95rem; line-height: 1.6;
+        }
+        #de-memo:focus { background: white; border-color: var(--accent-burgundy); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <header>
+        <div id="date-de"></div>
+        <h1>Guten Morgen, Nutzer</h1>
+        <div id="quote-container">
+            <span id="quote-text"></span>
+            <span id="quote-author" style="font-size: 0.9rem; font-weight: 500;"></span>
+        </div>
+    </header>
+
+    <div class="search-container">
+        <div class="search-bar">
+            <i data-lucide="search" size="20" style="color: #94a3b8;"></i>
+            <input type="text" id="search-input" placeholder="Suche..." onkeypress="handleSearch(event)">
+        </div>
+        <div class="engine-selector">
+            <button class="engine-btn active" onclick="setEngine('google', this)">Google</button>
+            <button class="engine-btn" onclick="setEngine('dict', this)">dict.cc</button>
+            <button class="engine-btn" onclick="setEngine('duden', this)">Duden</button>
+        </div>
+    </div>
+
+    <main class="dashboard-grid">
+        <section class="category-card" style="background: rgba(255, 241, 242, 0.4);">
+            <div class="card-header"><i data-lucide="headphones"></i> 1. HÖREN & SEHEN</div>
+            <ul class="link-list">
+                <li class="link-item"><a href="https://www.tagesschau.de/100sekunden/" target="_blank">Tagesschau 100s</a></li>
+                <li class="link-item"><a href="https://learngerman.dw.com/de/overview" target="_blank">DW Learn German</a></li>
+                <li class="link-item"><a href="https://www.youtube.com/" target="_blank">YouTube Deutsch</a></li>
+            </ul>
+        </section>
+
+        <section class="category-card" style="background: rgba(224, 238, 252, 0.4);">
+            <div class="card-header"><i data-lucide="book-open"></i> 2. LESEN</div>
+            <ul class="link-list">
+                <li class="link-item"><a href="https://www.zeit.de/" target="_blank">Die Zeit</a></li>
+                <li class="link-item"><a href="https://www.handelsblatt.com/" target="_blank">Handelsblatt</a></li>
+                <li class="link-item"><a href="https://www.spiegel.de/" target="_blank">Der Spiegel</a></li>
+            </ul>
+        </section>
+
+        <section class="category-card">
+            <div class="card-header"><i data-lucide="wrench"></i> 3. WERKZEUGE</div>
+            <ul class="link-list">
+                <li class="link-item"><a href="https://www.dict.cc/" target="_blank">dict.cc</a></li>
+                <li class="link-item"><a href="https://www.duden.de/" target="_blank">Duden Online</a></li>
+                <li class="link-item"><a href="https://www.deepl.com/" target="_blank">DeepL Translator</a></li>
+            </ul>
+        </section>
+
+        <section class="category-card">
+            <div class="card-header"><i data-lucide="edit-3"></i> 4. NOTIZEN</div>
+            <textarea id="de-memo" placeholder="오늘 외울 핵심 단어..."></textarea>
+        </section>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('date-de').innerText = new Date().toLocaleDateString('de-DE', dateOptions);
+
+        const quotes = [
+            { q: "Die Grenzen meiner Sprache bedeuten die Grenzen meiner Welt.", a: "Ludwig Wittgenstein" },
+            { q: "In der Beschränkung zeigt sich erst der Meister.", a: "Johann Wolfgang von Goethe" },
+            { q: "Aller Anfang ist schwer.", a: "Deutsches Sprichwort" }
+        ];
+        const selectedQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('quote-text').innerText = selectedQuote.q;
+        document.getElementById('quote-author').innerText = `- ${selectedQuote.a}`;
+
+        let currentEngine = 'google';
+        function setEngine(engine, btn) {
+            currentEngine = engine;
+            document.querySelectorAll('.engine-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') {
+                const query = document.getElementById('search-input').value;
+                if (!query) return;
+                let url = (currentEngine === 'google') ? `https://www.google.com/search?q=${query}` :
+                          (currentEngine === 'dict') ? `https://www.dict.cc/?s=${query}` :
+                          `https://www.duden.de/suchen/dudenonline/${query}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        const memoArea = document.getElementById('de-memo');
+        const STORAGE_KEY = 'GERMAN LEARNING DASHBOARD';
+        memoArea.value = localStorage.getItem(STORAGE_KEY) || '';
+        memoArea.addEventListener('input', (e) => {
+            localStorage.setItem(STORAGE_KEY, e.target.value);
+        });
+    </script>
+</body>
+</html>
